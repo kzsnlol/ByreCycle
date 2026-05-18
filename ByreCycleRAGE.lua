@@ -1,4 +1,4 @@
---// BYRECYCLE|RAGE - STATIC NOTIFICATIONS (FIXED HOLD)
+--// BYRECYCLE|RAGE - CLEAN WORKING
 local P=game:GetService("Players").LocalPlayer
 local U=game:GetService("UserInputService")
 local Active=true
@@ -16,7 +16,8 @@ local MainFrame=Instance.new("Frame")
 MainFrame.Size=UDim2.new(0,130,0,26)
 MainFrame.Position=UDim2.new(0.5,-65,1,-30)
 MainFrame.BackgroundColor3=Color3.new(0,0,0)
-MainFrame.BorderSizePixel=2
+MainFrame.BackgroundTransparency=0
+MainFrame.BorderSizePixel=1
 MainFrame.BorderColor3=Color3.new(0.5,0,1)
 MainFrame.Parent=GUI
 
@@ -25,17 +26,18 @@ Title.Size=UDim2.new(1,0,1,0)
 Title.BackgroundTransparency=1
 Title.Text="ByreCycle|Rage"
 Title.TextColor3=Color3.new(1,1,1)
-Title.TextSize=11
-Title.Font=Enum.Font.GothamBold
+Title.TextSize=12
+Title.Font=Enum.Font.Gotham
+Title.TextStrokeTransparency=1
 Title.Parent=MainFrame
 
--- Notification Frame (same style, starts invisible)
+-- Notification Frame
 local NotifyFrame=Instance.new("Frame")
 NotifyFrame.Size=UDim2.new(0,200,0,26)
 NotifyFrame.Position=UDim2.new(0.5,-100,1,-65)
 NotifyFrame.BackgroundColor3=Color3.new(0,0,0)
 NotifyFrame.BackgroundTransparency=0
-NotifyFrame.BorderSizePixel=2
+NotifyFrame.BorderSizePixel=1
 NotifyFrame.BorderColor3=Color3.new(0.5,0,1)
 NotifyFrame.Visible=false
 NotifyFrame.Parent=GUI
@@ -45,8 +47,9 @@ NotifyText.Size=UDim2.new(1,0,1,0)
 NotifyText.BackgroundTransparency=1
 NotifyText.Text=""
 NotifyText.TextColor3=Color3.new(1,1,1)
-NotifyText.TextSize=11
-NotifyText.Font=Enum.Font.GothamBold
+NotifyText.TextSize=12
+NotifyText.Font=Enum.Font.Gotham
+NotifyText.TextStrokeTransparency=1
 NotifyText.Parent=NotifyFrame
 
 -- Kill Button
@@ -54,7 +57,8 @@ local KillFrame=Instance.new("Frame")
 KillFrame.Size=UDim2.new(0,80,0,26)
 KillFrame.Position=UDim2.new(0.5,-40,0,5)
 KillFrame.BackgroundColor3=Color3.new(0,0,0)
-KillFrame.BorderSizePixel=2
+KillFrame.BackgroundTransparency=0
+KillFrame.BorderSizePixel=1
 KillFrame.BorderColor3=Color3.new(0.5,0,1)
 KillFrame.Parent=GUI
 
@@ -63,11 +67,11 @@ KillButton.Size=UDim2.new(1,0,1,0)
 KillButton.BackgroundTransparency=1
 KillButton.Text="killtest"
 KillButton.TextColor3=Color3.new(1,1,1)
-KillButton.TextSize=11
-KillButton.Font=Enum.Font.GothamBold
+KillButton.TextSize=12
+KillButton.Font=Enum.Font.Gotham
+KillButton.TextStrokeTransparency=1
 KillButton.Parent=KillFrame
 
--- Static notification function (no animations, doesn't block)
 local function ShowNotification(msg)
     NotifyText.Text=msg
     NotifyFrame.Visible=true
@@ -77,7 +81,6 @@ local function ShowNotification(msg)
     end)
 end
 
--- Functions
 local function GetHealth(target)
     if not target then return 0 end
     local char=target.Character
@@ -166,29 +169,24 @@ local function DoCycle()
         if not CurrentTarget then return end
     end
     
-    -- Store health before hit
     local healthBefore=GetHealth(CurrentTarget)
-    
     local targetPos=GetTargetPos(CurrentTarget)
     if not targetPos then return end
     
     local original=hrp.CFrame
-    hrp.CFrame=CFrame.new(targetPos)
-    task.wait(0.000001)
-    SimulateClick()
-    task.wait(0.000001)
-    hrp.CFrame=original
-    task.wait(0.000001)
     
-    -- Check health after hit
+    hrp.CFrame=CFrame.new(targetPos)
+    task.wait(0.025)
+    SimulateClick()
+    task.wait(0.005)
+    hrp.CFrame=original
+    
     local healthAfter=GetHealth(CurrentTarget)
     
-    -- Show hit notification (doesn't block)
     if healthAfter>0 and healthAfter<healthBefore then
         ShowNotification("hit tat nga")
     end
     
-    -- Show kill notification (doesn't block)
     if wasDead or healthAfter<=0 then
         ShowNotification("yeah he dead lol")
     end
@@ -201,7 +199,7 @@ local function Loop()
             DoCycle()
             Busy=false
         end
-        task.wait(0.000001)
+        task.wait(0.1)
     end
 end
 
@@ -230,7 +228,7 @@ KillButton.MouseButton1Click:Connect(function()
     GUI:Destroy()
 end)
 
-print("ByreCycle|Rage - STATIC NOTIFICATIONS (FIXED)")
-print("Hold Q - Notifications no longer interrupt the loop")
-print("Shows 'hit tat nga' on hit, 'yeah he dead lol' on kill")
+print("ByreCycle|Rage - CLEAN WORKING")
+print("Hold Q - Teleport, click, return")
+print("Simple, reliable, no bugs")
 print("Click killtest to destroy everything")
