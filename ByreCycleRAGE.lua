@@ -1,4 +1,4 @@
---// BYRECYCLE|RAGE - 1 STUD ABOVE WITH DEAD CHECK
+--// BYRECYCLE|RAGE - NO WAIT TELEPORT
 local P=game:GetService("Players").LocalPlayer
 local U=game:GetService("UserInputService")
 local Active=true
@@ -126,12 +126,10 @@ local function DoCycle()
     if not targetPos then return end
     
     local original=hrp.CFrame
-    hrp.CFrame=CFrame.new(targetPos)
-    task.wait(0.000001)
+    hrp.CFrame=CFrame.new(targetPos)  -- INSTANT, no wait
     SimulateClick()
-    task.wait(0.000001)
-    hrp.CFrame=original
-    task.wait(0.000001)
+    task.wait(0.000001)  -- 1 microsecond click delay
+    hrp.CFrame=original  -- INSTANT, no wait
 end
 
 local function Loop()
@@ -141,7 +139,7 @@ local function Loop()
             DoCycle()
             Busy=false
         end
-        task.wait(0.00001)  -- 0.01ms interval (10 microseconds)
+        task.wait(0.00001)  -- 0.01ms interval
     end
 end
 
@@ -167,3 +165,11 @@ KillButton.MouseButton1Click:Connect(function()
     if KeyStop then KeyStop:Disconnect() end
     GUI:Destroy()
 end)
+
+print("ByreCycle|Rage - NO WAIT TELEPORT")
+print("Hold Q - INSTANT teleport to 1 stud above enemy")
+print("1μs click delay only")
+print("INSTANT teleport back (no delay)")
+print("0.01ms interval between cycles")
+print("Auto-switches target when current dies")
+print("Click killtest to destroy everything")
