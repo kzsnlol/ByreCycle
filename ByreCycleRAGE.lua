@@ -1,4 +1,4 @@
---// BYRECYCLE|RAGE - NO WAIT TELEPORT
+--// BYRECYCLE|RAGE - NO DISTANCE (DIRECT TELEPORT)
 local P=game:GetService("Players").LocalPlayer
 local U=game:GetService("UserInputService")
 local Active=true
@@ -93,7 +93,8 @@ local function GetTargetPos(target)
     if not char then return nil end
     local hrp=char:FindFirstChild("HumanoidRootPart")
     if not hrp then return nil end
-    return hrp.Position + Vector3.new(0, 1, 0)
+    -- Direct teleport to enemy position (no distance offset)
+    return hrp.Position
 end
 
 local function SimulateClick()
@@ -126,10 +127,10 @@ local function DoCycle()
     if not targetPos then return end
     
     local original=hrp.CFrame
-    hrp.CFrame=CFrame.new(targetPos)  -- INSTANT, no wait
+    hrp.CFrame=CFrame.new(targetPos)
     SimulateClick()
-    task.wait(0.000001)  -- 1 microsecond click delay
-    hrp.CFrame=original  -- INSTANT, no wait
+    task.wait(0.000001)
+    hrp.CFrame=original
 end
 
 local function Loop()
@@ -139,7 +140,7 @@ local function Loop()
             DoCycle()
             Busy=false
         end
-        task.wait(0.00001)  -- 0.01ms interval
+        task.wait(0.00001)
     end
 end
 
@@ -166,10 +167,7 @@ KillButton.MouseButton1Click:Connect(function()
     GUI:Destroy()
 end)
 
-print("ByreCycle|Rage - NO WAIT TELEPORT")
-print("Hold Q - INSTANT teleport to 1 stud above enemy")
-print("1μs click delay only")
-print("INSTANT teleport back (no delay)")
-print("0.01ms interval between cycles")
-print("Auto-switches target when current dies")
+print("ByreCycle|Rage - DIRECT TELEPORT (NO DISTANCE)")
+print("Hold Q - teleport DIRECTLY ONTO enemy -> click -> return")
+print("No vertical or horizontal offset - exact enemy position")
 print("Click killtest to destroy everything")
