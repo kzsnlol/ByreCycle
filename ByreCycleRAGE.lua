@@ -1,4 +1,4 @@
---// BYRECYCLE|RAGE - DIRECT TELEPORT (NO DISTANCE)
+--// BYRECYCLE|RAGE - STATIC NOTIFICATIONS (FIXED HOLD)
 local P=game:GetService("Players").LocalPlayer
 local U=game:GetService("UserInputService")
 local Active=true
@@ -11,6 +11,7 @@ GUI.Name="BR"
 GUI.ResetOnSpawn=false
 GUI.Parent=P:WaitForChild("PlayerGui")
 
+-- Main UI
 local MainFrame=Instance.new("Frame")
 MainFrame.Size=UDim2.new(0,130,0,26)
 MainFrame.Position=UDim2.new(0.5,-65,1,-30)
@@ -28,6 +29,27 @@ Title.TextSize=11
 Title.Font=Enum.Font.GothamBold
 Title.Parent=MainFrame
 
+-- Notification Frame (same style, starts invisible)
+local NotifyFrame=Instance.new("Frame")
+NotifyFrame.Size=UDim2.new(0,200,0,26)
+NotifyFrame.Position=UDim2.new(0.5,-100,1,-65)
+NotifyFrame.BackgroundColor3=Color3.new(0,0,0)
+NotifyFrame.BackgroundTransparency=0
+NotifyFrame.BorderSizePixel=2
+NotifyFrame.BorderColor3=Color3.new(0.5,0,1)
+NotifyFrame.Visible=false
+NotifyFrame.Parent=GUI
+
+local NotifyText=Instance.new("TextLabel")
+NotifyText.Size=UDim2.new(1,0,1,0)
+NotifyText.BackgroundTransparency=1
+NotifyText.Text=""
+NotifyText.TextColor3=Color3.new(1,1,1)
+NotifyText.TextSize=11
+NotifyText.Font=Enum.Font.GothamBold
+NotifyText.Parent=NotifyFrame
+
+-- Kill Button
 local KillFrame=Instance.new("Frame")
 KillFrame.Size=UDim2.new(0,80,0,26)
 KillFrame.Position=UDim2.new(0.5,-40,0,5)
@@ -44,6 +66,26 @@ KillButton.TextColor3=Color3.new(1,1,1)
 KillButton.TextSize=11
 KillButton.Font=Enum.Font.GothamBold
 KillButton.Parent=KillFrame
+
+-- Static notification function (no animations, doesn't block)
+local function ShowNotification(msg)
+    NotifyText.Text=msg
+    NotifyFrame.Visible=true
+    task.spawn(function()
+        task.wait(1)
+        NotifyFrame.Visible=false
+    end)
+end
+
+-- Functions
+local function GetHealth(target)
+    if not target then return 0 end
+    local char=target.Character
+    if not char then return 0 end
+    local hum=char:FindFirstChild("Humanoid")
+    if not hum then return 0 end
+    return hum.Health
+end
 
 local function IsAlive(target)
     if not target then return false end
@@ -112,7 +154,9 @@ local function DoCycle()
     local hrp=char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     
+    local wasDead=false
     if IsDead(CurrentTarget) then
+        wasDead=true
         CurrentTarget=GetNearest()
         if not CurrentTarget then return end
     end
@@ -122,14 +166,32 @@ local function DoCycle()
         if not CurrentTarget then return end
     end
     
+    -- Store health before hit
+    local healthBefore=GetHealth(CurrentTarget)
+    
     local targetPos=GetTargetPos(CurrentTarget)
     if not targetPos then return end
     
     local original=hrp.CFrame
     hrp.CFrame=CFrame.new(targetPos)
+    task.wait(0.000001)
     SimulateClick()
     task.wait(0.000001)
     hrp.CFrame=original
+    task.wait(0.000001)
+    
+    -- Check health after hit
+    local healthAfter=GetHealth(CurrentTarget)
+    
+    -- Show hit notification (doesn't block)
+    if healthAfter>0 and healthAfter<healthBefore then
+        ShowNotification("hit tat nga")
+    end
+    
+    -- Show kill notification (doesn't block)
+    if wasDead or healthAfter<=0 then
+        ShowNotification("yeah he dead lol")
+    end
 end
 
 local function Loop()
@@ -139,7 +201,7 @@ local function Loop()
             DoCycle()
             Busy=false
         end
-        task.wait(0.00001)
+        task.wait(0.000001)
     end
 end
 
@@ -155,7 +217,9 @@ end)
 
 KeyStop=U.InputEnded:Connect(function(i,g)
     if g then return end
-    if i.KeyCode==Enum.KeyCode.Q then Holding=false end
+    if i.KeyCode==Enum.KeyCode.Q then
+        Holding=false
+    end
 end)
 
 KillButton.MouseButton1Click:Connect(function()
@@ -166,7 +230,7 @@ KillButton.MouseButton1Click:Connect(function()
     GUI:Destroy()
 end)
 
-print("ByreCycle|Rage - DIRECT TELEPORT (NO DISTANCE)")
-print("Hold Q - teleport DIRECTLY ONTO enemy -> click -> return")
-print("No black mask - clean and simple")
+print("ByreCycle|Rage - STATIC NOTIFICATIONS (FIXED)")
+print("Hold Q - Notifications no longer interrupt the loop")
+print("Shows 'hit tat nga' on hit, 'yeah he dead lol' on kill")
 print("Click killtest to destroy everything")
