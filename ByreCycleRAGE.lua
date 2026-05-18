@@ -1,10 +1,12 @@
---// BYRECYCLE|RAGE - CLEAN WORKING
+--// BYRECYCLE|RAGE - WITH DEATH NOTIFICATION
 local P=game:GetService("Players").LocalPlayer
 local U=game:GetService("UserInputService")
 local Active=true
 local Holding=false
 local CurrentTarget=nil
 local Busy=false
+local LastHealth=100
+local DiedNotified=false
 
 local GUI=Instance.new("ScreenGui")
 GUI.Name="BR"
@@ -31,10 +33,10 @@ Title.Font=Enum.Font.Gotham
 Title.TextStrokeTransparency=1
 Title.Parent=MainFrame
 
--- Notification Frame
+-- Notification Frame (bigger text)
 local NotifyFrame=Instance.new("Frame")
-NotifyFrame.Size=UDim2.new(0,200,0,26)
-NotifyFrame.Position=UDim2.new(0.5,-100,1,-65)
+NotifyFrame.Size=UDim2.new(0,280,0,35)
+NotifyFrame.Position=UDim2.new(0.5,-140,1,-65)
 NotifyFrame.BackgroundColor3=Color3.new(0,0,0)
 NotifyFrame.BackgroundTransparency=0
 NotifyFrame.BorderSizePixel=1
@@ -47,7 +49,7 @@ NotifyText.Size=UDim2.new(1,0,1,0)
 NotifyText.BackgroundTransparency=1
 NotifyText.Text=""
 NotifyText.TextColor3=Color3.new(1,1,1)
-NotifyText.TextSize=12
+NotifyText.TextSize=16
 NotifyText.Font=Enum.Font.Gotham
 NotifyText.TextStrokeTransparency=1
 NotifyText.Parent=NotifyFrame
@@ -72,14 +74,50 @@ KillButton.Font=Enum.Font.Gotham
 KillButton.TextStrokeTransparency=1
 KillButton.Parent=KillFrame
 
-local function ShowNotification(msg)
+local function ShowNotification(msg, isDeath)
     NotifyText.Text=msg
     NotifyFrame.Visible=true
+    
+    if isDeath then
+        NotifyFrame.BorderColor3=Color3.new(0.5,0,1)
+        NotifyText.TextColor3=Color3.new(0.8,0.4,1)
+    else
+        NotifyFrame.BorderColor3=Color3.new(0.5,0,1)
+        NotifyText.TextColor3=Color3.new(1,1,1)
+    end
+    
     task.spawn(function()
-        task.wait(1)
+        local duration = isDeath and 3 or 1
+        task.wait(duration)
         NotifyFrame.Visible=false
     end)
 end
+
+-- Check for player death
+local function CheckDeath()
+    local char=P.Character
+    if not char then return end
+    local hum=char:FindFirstChild("Humanoid")
+    if not hum then return end
+    local currentHealth=hum.Health
+    
+    if currentHealth<=0 and not DiedNotified and LastHealth>0 then
+        ShowNotification("while cheating? u buns", true)
+        DiedNotified=true
+    elseif currentHealth>0 then
+        DiedNotified=false
+    end
+    
+    LastHealth=currentHealth
+end
+
+-- Death check loop
+task.spawn(function()
+    while Active do
+        CheckDeath()
+        task.wait(0.5)
+    end
+end)
 
 local function GetHealth(target)
     if not target then return 0 end
@@ -184,11 +222,11 @@ local function DoCycle()
     local healthAfter=GetHealth(CurrentTarget)
     
     if healthAfter>0 and healthAfter<healthBefore then
-        ShowNotification("hit tat nga")
+        ShowNotification("hit tat nga", false)
     end
     
     if wasDead or healthAfter<=0 then
-        ShowNotification("yeah he dead lol")
+        ShowNotification("yeah he dead lol", false)
     end
 end
 
@@ -228,7 +266,8 @@ KillButton.MouseButton1Click:Connect(function()
     GUI:Destroy()
 end)
 
-print("ByreCycle|Rage - CLEAN WORKING")
+print("ByreCycle|Rage - PURPLE DEATH NOTIFICATION")
 print("Hold Q - Teleport, click, return")
-print("Simple, reliable, no bugs")
+print("Death message: 'while cheating? u buns' - 3 seconds, purple theme")
+print("Bigger font (16) - NOT BOLD")
 print("Click killtest to destroy everything")
