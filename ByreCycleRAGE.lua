@@ -1,7 +1,6 @@
---// BYRECYCLE|RAGE - BLACK SCREEN MASK
+--// BYRECYCLE|RAGE - DIRECT TELEPORT (NO DISTANCE)
 local P=game:GetService("Players").LocalPlayer
 local U=game:GetService("UserInputService")
-local RS=game:GetService("RunService")
 local Active=true
 local Holding=false
 local CurrentTarget=nil
@@ -12,17 +11,6 @@ GUI.Name="BR"
 GUI.ResetOnSpawn=false
 GUI.Parent=P:WaitForChild("PlayerGui")
 
--- Black Screen Mask (for hiding teleport)
-local BlackMask=Instance.new("Frame")
-BlackMask.Size=UDim2.new(1,0,1,0)
-BlackMask.Position=UDim2.new(0,0,0,0)
-BlackMask.BackgroundColor3=Color3.new(0,0,0)
-BlackMask.BackgroundTransparency=1
-BlackMask.BorderSizePixel=0
-BlackMask.Visible=false
-BlackMask.Parent=GUI
-
--- Main UI
 local MainFrame=Instance.new("Frame")
 MainFrame.Size=UDim2.new(0,130,0,26)
 MainFrame.Position=UDim2.new(0.5,-65,1,-30)
@@ -40,7 +28,6 @@ Title.TextSize=11
 Title.Font=Enum.Font.GothamBold
 Title.Parent=MainFrame
 
--- Kill Button
 local KillFrame=Instance.new("Frame")
 KillFrame.Size=UDim2.new(0,80,0,26)
 KillFrame.Position=UDim2.new(0.5,-40,0,5)
@@ -58,7 +45,6 @@ KillButton.TextSize=11
 KillButton.Font=Enum.Font.GothamBold
 KillButton.Parent=KillFrame
 
--- Functions
 local function IsAlive(target)
     if not target then return false end
     local char=target.Character
@@ -139,29 +125,11 @@ local function DoCycle()
     local targetPos=GetTargetPos(CurrentTarget)
     if not targetPos then return end
     
-    -- Black screen mask (brain will fill the gap)
-    BlackMask.Visible=true
-    BlackMask.BackgroundTransparency=0
-    
-    -- Wait 1 frame for black screen to render
-    RS.RenderStepped:Wait()
-    
-    -- Teleport during black screen
     local original=hrp.CFrame
     hrp.CFrame=CFrame.new(targetPos)
-    
-    -- Click while at enemy
     SimulateClick()
-    
-    -- Teleport back
+    task.wait(0.000001)
     hrp.CFrame=original
-    
-    -- Wait 1 more frame before removing mask
-    RS.RenderStepped:Wait()
-    
-    -- Remove black screen
-    BlackMask.Visible=false
-    BlackMask.BackgroundTransparency=1
 end
 
 local function Loop()
@@ -171,45 +139,34 @@ local function Loop()
             DoCycle()
             Busy=false
         end
-        task.wait(0.00001) -- 0.01ms interval
+        task.wait(0.00001)
     end
 end
 
--- Keybind
-local KeyThread=nil
 local KeyStart,KeyStop
-
 KeyStart=U.InputBegan:Connect(function(i,g)
     if g or not Active then return end
     if i.KeyCode==Enum.KeyCode.Q and not Holding then
         Holding=true
         CurrentTarget=GetNearest()
-        KeyThread=task.spawn(Loop)
+        task.spawn(Loop)
     end
 end)
 
 KeyStop=U.InputEnded:Connect(function(i,g)
     if g then return end
-    if i.KeyCode==Enum.KeyCode.Q then
-        Holding=false
-    end
+    if i.KeyCode==Enum.KeyCode.Q then Holding=false end
 end)
 
--- Kill button
 KillButton.MouseButton1Click:Connect(function()
     Holding=false
     Active=false
-    if KeyThread then
-        task.cancel(KeyThread)
-        KeyThread=nil
-    end
     if KeyStart then KeyStart:Disconnect() end
     if KeyStop then KeyStop:Disconnect() end
     GUI:Destroy()
 end)
 
-print("ByreCycle|Rage - BLACK SCREEN MASK")
-print("Hold Q - Teleport with black frame masking")
-print("Brain fills in the black frame - teleport is impossible to see")
-print("Direct teleport to enemy position -> click -> return")
+print("ByreCycle|Rage - DIRECT TELEPORT (NO DISTANCE)")
+print("Hold Q - teleport DIRECTLY ONTO enemy -> click -> return")
+print("No black mask - clean and simple")
 print("Click killtest to destroy everything")
